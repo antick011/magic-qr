@@ -26,11 +26,10 @@ Businesses use **Magic QR** to:
 
 ## ⚙️ Tech Stack
 
-- **Back-end**: PHP (MVC)
+- **Back-end**: PHP
 - **Database**: MySQL
-- **Frontend**: Bootstrap, Blade templates
-- **QR Code**: Simple QR generation libraries
-- **Hosting**: XAMPP / Apache or Render / Netlify for frontend
+- **Frontend**: Bootstrap
+- **QR Code**: Simple QR generation libraries OF Pythom
 
 ---
 
