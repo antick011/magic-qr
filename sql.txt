@@ -1,0 +1,114 @@
+# SQL Queries for MagicQR Project
+
+## 1. **Database Creation**
+```sql
+CREATE DATABASE magicqr;
+USE magicqr;
+```
+- **Creates the `magicqr` database and selects it for use.**
+
+## 2. **Customers Table**
+```sql
+CREATE TABLE customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+- **Stores customer details.**
+- **`id` is the primary key.**
+
+## 3. **Feedback Table**
+```sql
+CREATE TABLE feedback (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    name VARCHAR(255),
+    phone_number VARCHAR(20),
+    comments TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+);
+```
+- **Stores feedback data with a foreign key linking to `customers`.**
+- **`ON DELETE CASCADE` ensures that deleting a customer also deletes their feedback.**
+
+## 4. **Admin Table**
+```sql
+CREATE TABLE admin (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL
+);
+```
+- **Stores admin credentials.**
+
+## 5. **Insert Sample Data**
+```sql
+INSERT INTO customers (name, email, phone) VALUES
+('John Doe', 'john@example.com', '1234567890'),
+('Jane Smith', 'jane@example.com', '9876543210');
+```
+```sql
+INSERT INTO feedback (customer_id, rating, name, phone_number, comments) VALUES
+(1, 5, 'John Doe', '1234567890', 'Great service!'),
+(2, 3, 'Jane Smith', '9876543210', 'Average experience.');
+```
+- **Adds test data for customers and feedback.**
+
+## 6. **Check Data in Tables**
+```sql
+SELECT * FROM customers;
+SELECT * FROM feedback;
+SELECT * FROM admin;
+```
+- **Verifies that the tables contain the expected data.**
+
+## 7. **Check Foreign Key Constraints**
+```sql
+SELECT
+    TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+WHERE TABLE_NAME = 'feedback';
+```
+- **Confirms that `feedback.customer_id` correctly references `customers.id`.**
+
+## 8. **Fix Foreign Key Issues**
+```sql
+ALTER TABLE feedback DROP FOREIGN KEY feedback_ibfk_1;
+ALTER TABLE feedback ADD CONSTRAINT feedback_ibfk_1
+FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE;
+```
+- **Re-establishes correct foreign key relationships if needed.**
+
+## 9. **Delete Orphaned Feedback Entries**
+```sql
+DELETE FROM feedback WHERE customer_id NOT IN (SELECT id FROM customers);
+```
+- **Removes feedback linked to non-existent customers.**
+
+## 10. **Payment Plans Table**
+```sql
+CREATE TABLE payment_plans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    plan_type ENUM('lifetime', 'yearly', 'half-yearly') NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    payment_status ENUM('active', 'expired') DEFAULT 'active',
+    expiry_date DATE,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+);
+```
+- **Manages customer payment plans and expiry status.**
+
+## 11. **Check Expired Plans & Disable QR Access**
+```sql
+UPDATE payment_plans
+SET payment_status = 'expired'
+WHERE expiry_date < CURDATE();
+```
+- **Marks plans as expired if they have passed the expiry date.**
+
